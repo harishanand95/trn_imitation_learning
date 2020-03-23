@@ -1,27 +1,10 @@
-# from pynput.keyboard import Key, Listener
 import rospy
 from geometry_msgs.msg import PoseStamped
 from mavros_msgs.msg import State, PositionTarget
 import math
 from mavros_msgs.srv import SetMode, CommandBool
-from mavros_test_common import MavrosTestCommon
-
-# def on_press(key):
-#     print('{0} pressed'.format(
-#         key))
-#
-# def on_release(key):
-#     print('{0} release'.format(
-#         key))
-#     if key == Key.esc:
-#         # Stop listener
-#         return False
-#
-# # Collect events until released
-# with Listener(
-#         on_press=on_press,
-#         on_release=on_release) as listener:
-#     listener.join()
+from std_msgs.msg import String
+import time
 
 
 class OffboardControl:
@@ -38,8 +21,14 @@ class OffboardControl:
         self.pose_sub = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, callback=self.pose_callback)
         self.state_sub = rospy.Subscriber('/mavros/state', State, callback=self.state_callback)
         self.vel_pub = rospy.Publisher('/mavros/setpoint_raw/local', PositionTarget, queue_size=10)
-        # state machine code defined in controller function
+        self.decision = rospy.Subscriber('/data', String, callback=self.set_mode)
         self.controller()
+
+    def set_mode(self, msg):
+        if msg.data == "FORWARD":
+            self.mode = "FORWARD"
+        elif msg.data == "HOVER":
+            self.mode = "HOVER"
 
     def pose_callback(self, msg):
         self.curr_pose = msg
@@ -65,14 +54,6 @@ class OffboardControl:
             armService(True)
         except rospy.ServiceException as e:
             print("Service arm call failed: %s" % e)
-
-    def set_disarm(self):
-        rospy.wait_for_service('/mavros/cmd/arming')
-        try:
-            armService = rospy.ServiceProxy('/mavros/cmd/arming', CommandBool)
-            armService(False)
-        except rospy.ServiceException as e:
-            print("Service disarm call failed: %s" % e)
 
     def take_off(self):
         self.set_offboard_mode()
@@ -106,8 +87,8 @@ class OffboardControl:
                 waypoint_index = 0
                 sim_ctr += 1
                 print("HOVER COUNTER: " + str(sim_ctr))
-            if self.is_ready_to_fly:
 
+            if self.is_ready_to_fly:
                 des_x = loc[waypoint_index][0]
                 des_y = loc[waypoint_index][1]
                 des_z = loc[waypoint_index][2]
@@ -129,15 +110,31 @@ class OffboardControl:
                     waypoint_index += 1
 
             pose_pub.publish(des_pose)
-
             rate.sleep()
 
+
+    def velocity_controller(self, x, y, z):
+        des_vel = PositionTarget()
+        des_vel.header.frame_id = "world"
+        des_vel.header.stamp = rospy.Time.from_sec(time.time())
+        des_vel.coordinate_frame = 8
+        des_vel.type_mask = 3527
+        des_vel.velocity.x = x
+        des_vel.velocity.y = y
+        des_vel.velocity.z = z
+        return des_vel
+
+    def forward(self):
+        while self.mode == "FORWARD" and not rospy.is_shutdown():
+            self.vel_pub.publish(self.velocity_controller(0, 1, 0))
 
     def controller(self):
         while not rospy.is_shutdown():
             if self.mode == "HOVER":
                 self.hover()
-                
-                
+            elif self.mode == "FORWARD":
+                self.forward()
+
+
 if __name__ == "__main__":
     OffboardControl()
