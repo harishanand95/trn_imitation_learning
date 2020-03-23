@@ -8,7 +8,8 @@ import time
 
 
 class OffboardControl:
-    """ PX4 UAV controller works in offboard mode"""
+    """ Teleoperation based controller for PX4-UAV offboard mode """
+
     def __init__(self):
         self.curr_pose = PoseStamped()
         self.is_ready_to_fly = False
@@ -25,10 +26,7 @@ class OffboardControl:
         self.controller()
 
     def set_mode(self, msg):
-        if msg.data == "FORWARD":
-            self.mode = "FORWARD"
-        elif msg.data == "HOVER":
-            self.mode = "HOVER"
+        self.mode = str(msg.data)
 
     def pose_callback(self, msg):
         self.curr_pose = msg
@@ -112,7 +110,6 @@ class OffboardControl:
             pose_pub.publish(des_pose)
             rate.sleep()
 
-
     def velocity_controller(self, x, y, z):
         des_vel = PositionTarget()
         des_vel.header.frame_id = "world"
@@ -125,16 +122,22 @@ class OffboardControl:
         return des_vel
 
     def forward(self):
-        while self.mode == "FORWARD" and not rospy.is_shutdown():
-            self.vel_pub.publish(self.velocity_controller(0, 1, 0))
+        while self.mode[:7] == "FORWARD" and not rospy.is_shutdown():
+            if self.mode == "FORWARD-UP":
+                print(self.mode)
+                self.vel_pub.publish(self.velocity_controller(0, 1, 0.5))
+            elif self.mode == "FORWARD-DOWN":
+                print(self.mode)
+                self.vel_pub.publish(self.velocity_controller(0, 1, -0.5))
+            else:
+                self.vel_pub.publish(self.velocity_controller(0, 1, 0))
 
     def controller(self):
         while not rospy.is_shutdown():
             if self.mode == "HOVER":
                 self.hover()
-            elif self.mode == "FORWARD":
+            elif self.mode[:7] == "FORWARD":
                 self.forward()
-
 
 if __name__ == "__main__":
     OffboardControl()

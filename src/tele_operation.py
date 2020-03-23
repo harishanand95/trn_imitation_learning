@@ -17,9 +17,9 @@ def on_release(key):
     if key == Key.space:
         pub.publish("FORWARD")
     elif key == Key.up:
-        pass
+        pub.publish("FORWARD-UP")
     elif key == Key.down:
-        pass
+        pub.publish("FORWARD-DOWN")
     elif key == Key.shift_r or key == Key.shift_l:
         pub.publish("HOVER")
     elif key == Key.esc:
