@@ -11,9 +11,12 @@
     <arg name="Y" default="0"/>
     <!-- vehicle model and world -->
     <arg name="est" default="ekf2"/>
+
     <arg name="vehicle" default="iris"/>
-    <arg name="world" default="$(find trn_imitation_learning)/worlds/baylands.world"/>
-    <arg name="sdf" default="$(find mavlink_sitl_gazebo)/models/$(arg vehicle)/$(arg vehicle).sdf"/>
+    <arg name="vehicle_sdf" default="iris_stereo_camera"/>
+    <arg name="world" default="$(find trn_imitation_learning)/worlds/baylands.world"/> 
+    <!-- <arg name="world"  default="$(find mavlink_sitl_gazebo)/worlds/empty.world" /> -->
+    <arg name="sdf" default="$(find mavlink_sitl_gazebo)/models/$(arg vehicle_sdf)/$(arg vehicle_sdf).sdf"/>
 
     <!-- gazebo configs -->
     <arg name="gui" default="true"/>
@@ -51,4 +54,6 @@
         <arg name="fcu_url" value="$(arg fcu_url)"/>
         <arg name="respawn_mavros" value="$(arg respawn_mavros)"/>
     </include>
+    <!-- Stereo camera -->
+    <node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc" ns="/stereo"></node>
 </launch>
