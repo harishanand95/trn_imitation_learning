@@ -23,6 +23,7 @@ class OffboardControl:
         self.state_sub = rospy.Subscriber('/mavros/state', State, callback=self.state_callback)
         self.vel_pub = rospy.Publisher('/mavros/setpoint_raw/local', PositionTarget, queue_size=10)
         self.decision = rospy.Subscriber('/data', String, callback=self.set_mode)
+        self.vel_history = rospy.Publisher('/OffboardControl/velocity_command', String, queue_size=10)
         self.controller()
 
     def set_mode(self, msg):
@@ -111,6 +112,7 @@ class OffboardControl:
             rate.sleep()
 
     def velocity_controller(self, x, y, z):
+        """ Generate x, y, z velocity message for UAV """
         des_vel = PositionTarget()
         des_vel.header.frame_id = "world"
         des_vel.header.stamp = rospy.Time.from_sec(time.time())
@@ -122,22 +124,28 @@ class OffboardControl:
         return des_vel
 
     def forward(self):
+        """ Forward controller """
         while self.mode[:7] == "FORWARD" and not rospy.is_shutdown():
             if self.mode == "FORWARD-UP":
                 print(self.mode)
+                self.vel_history.publish("0.5")
                 self.vel_pub.publish(self.velocity_controller(0, 1, 0.5))
             elif self.mode == "FORWARD-DOWN":
                 print(self.mode)
+                self.vel_history.publish("-0.5")
                 self.vel_pub.publish(self.velocity_controller(0, 1, -0.5))
             else:
+                self.vel_history.publish("0")
                 self.vel_pub.publish(self.velocity_controller(0, 1, 0))
 
     def controller(self):
+        """ A state machine developed to convert UAV movement to fixed states """
         while not rospy.is_shutdown():
             if self.mode == "HOVER":
                 self.hover()
             elif self.mode[:7] == "FORWARD":
                 self.forward()
+
 
 if __name__ == "__main__":
     OffboardControl()
