@@ -19,6 +19,12 @@ The following keys are the mapped for desired effect:
                 4. Shift - go back to initial start location
                 5. Esc - quit recording keys (EXIT)
 
+#### Generate Disparity image
+
+Run the following command to generate disparity images.
+
+`rosrun topic_tools transform /stereo/disparity /stereo/disparity_image sensor_msgs/Image 'm.image'`
+
 #### Screenshot
 
 Urban Environment

@@ -59,4 +59,7 @@
     </include>
     <!-- Stereo camera -->
     <node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc" ns="/stereo"></node>
+    <!-- rosrun topic_tools transform /stereo/disparity /stereo/disparity_image sensor_msgs/Image 'm.image'
+    <node name="disparity_conv" pkg="topic_tools" type="transform"
+    args="/stereo/disparity /stereo/disparity_image sensor_msgs/Image 'm.image'" /> -->
 </launch>
