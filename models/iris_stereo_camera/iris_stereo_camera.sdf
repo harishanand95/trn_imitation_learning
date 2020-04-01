@@ -1,0 +1,93 @@
+<?xml version="1.0" ?>
+<sdf version='1.5'>
+  <model name='iris_stereo_camera'>
+    <include>
+      <uri>model://iris</uri>
+    </include>
+
+    <include>
+      <uri>model://stereo_camera</uri>
+      <pose>0.1 0 0 0 0 0</pose>
+    </include>
+    <joint name="stereo_camera_joint" type="revolute">
+      <child>stereo_camera::link</child>
+      <parent>iris::base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+
+  <!--sonar-->
+  <link name="range_down_link">
+    <pose frame=''>0 0.015 -0.04 3.14159 1.57079 3.14159</pose>
+    <inertial> <!-- causes issues when omitted -->
+      <mass>0.05</mass>
+      <inertia>
+        <ixx>2.08333333333e-07</ixx>
+        <iyy>5.20833333333e-07</iyy>
+        <izz>5.20833333333e-07</izz>
+      </inertia>
+    </inertial>
+    <visual name="range_down_link_visual">
+      <pose frame=''>0 0 0 0 1.57079 0</pose>
+      <geometry>
+        <cylinder>
+          <length>0.008</length>
+          <radius>0.004</radius>
+        </cylinder>
+      </geometry>
+      <material>
+        <script>
+          <name>Gazebo/Blue</name>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+        </script>
+      </material>
+    </visual>
+    <sensor type="ray" name="iris_range_down">
+      <update_rate>10</update_rate>
+      <visualize>true</visualize>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>1</samples>
+            <resolution>1</resolution>
+            <min_angle>-0</min_angle>
+            <max_angle>0</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.06</min> <!-- do not change (smaller values cause issues) -->
+          <max>35</max>   <!-- do not change (bigger values cause issues) -->
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="iris_range_down_controller" filename="libgazebo_ros_range.so">
+        <robotNamespace>iris_odom</robotNamespace>
+        <gaussianNoise>0.005</gaussianNoise>
+        <alwaysOn>true</alwaysOn>
+        <updateRate>10</updateRate>
+        <topicName>range_down</topicName>
+        <frameName>range_down_link</frameName>
+        <fov>0</fov>
+        <radiation>ultrasound</radiation>
+      </plugin>
+    </sensor>
+  </link>
+
+  <joint name="range_down_joint" type="fixed">
+    <parent>iris::base_link</parent>
+    <child>range_down_link</child>
+  </joint>
+
+
+  </model>
+</sdf>
