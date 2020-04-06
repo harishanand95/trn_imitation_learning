@@ -7,14 +7,14 @@ pub = rospy.Publisher('/data', String, queue_size=10)
 
 def on_release(key):
     """ Press the following keys for desired effect :
-            1. Space - moves the drone forward by 1m/s.
+            1. Left arrow - moves the drone forward by 1m/s.
             2. Up - increase height by 0.5 m/s
             3. Down - decrease height by 0.5m/s
             4. Shift - go back to initial start location
             5. Esc - quit recording keys
     """
     print('{0} release'.format(key))
-    if key == Key.space:
+    if key == Key.left:
         pub.publish("FORWARD")
     elif key == Key.up:
         pub.publish("FORWARD-UP")
@@ -30,7 +30,7 @@ def on_press(key):
     pass
 
 print(""" Press the following keys for desired effect :
-                1. Space - moves the drone forward by 1m/s.
+                1. Left arrow - moves the drone forward by 1m/s.
                 2. Up - increase height by 0.5 m/s
                 3. Down - decrease height by 0.5m/s
                 4. Shift - go back to initial start location
