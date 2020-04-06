@@ -13,7 +13,7 @@
     <arg name="est" default="ekf2"/>
 
     <arg name="vehicle" default="iris"/>
-    <arg name="vehicle_sdf" default="iris_stereo_camera"/>
+    <arg name="vehicle_sdf" default="iris_depth_camera"/>
 
     <arg name="world" default="$(find trn_imitation_learning)/worlds/baylands.world"/> 
 <!--    
@@ -57,9 +57,17 @@
         <arg name="fcu_url" value="$(arg fcu_url)"/>
         <arg name="respawn_mavros" value="$(arg respawn_mavros)"/>
     </include>
-    <!-- Stereo camera -->
-    <node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc" ns="/stereo"></node>
+    <!-- Stereo camera 
+	<group ns="/stereo" >
+    <node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc">
+        <param name="disparity_range" type="int" value="128"/>
+    <param name="approximate_sync" type="bool" value="false"/>
+    </node> -->
+
+    <!--    <node pkg="nodelet" type="nodelet" name="disparity2depth" args="standalone rtabmap_ros/disparity_to_depth"/> -->
     <!-- rosrun topic_tools transform /stereo/disparity /stereo/disparity_image sensor_msgs/Image 'm.image'
     <node name="disparity_conv" pkg="topic_tools" type="transform"
-    args="/stereo/disparity /stereo/disparity_image sensor_msgs/Image 'm.image'" /> -->
+    args="/stereo/disparity /stereo/disparity_image sensor_msgs/Image 'm.image'" />
+  </group> -->
+
 </launch>

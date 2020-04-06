@@ -1,16 +1,16 @@
 <?xml version="1.0" ?>
 <sdf version='1.5'>
-  <model name='iris_stereo_camera'>
+  <model name='iris_depth_camera'>
     <include>
       <uri>model://iris</uri>
     </include>
 
     <include>
-      <uri>model://stereo_camera</uri>
+      <uri>model://depth_camera</uri>
       <pose>0.1 0 0 0 0 0</pose>
     </include>
-    <joint name="stereo_camera_joint" type="revolute">
-      <child>stereo_camera::link</child>
+    <joint name="depth_camera_joint" type="revolute">
+      <child>depth_camera::link</child>
       <parent>iris::base_link</parent>
       <axis>
         <xyz>0 0 1</xyz>

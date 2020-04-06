@@ -13,9 +13,10 @@ class OffboardControl:
     def __init__(self):
         self.curr_pose = PoseStamped()
         self.is_ready_to_fly = False
-        self.hover_loc = [0, 0, 7, 0, 0, 0, 0]
+        self.hover_loc = [-192.959454, -50.688204, 50, 0, 0, 0, 0]
         self.mode = "HOVER"
         self.dist_threshold = 0.4
+        self.arm = False
 
         # define ros subscribers and publishers
         rospy.init_node('OffboardControl', anonymous=True)
@@ -33,7 +34,7 @@ class OffboardControl:
         self.curr_pose = msg
 
     def state_callback(self, msg):
-        if msg.mode == 'OFFBOARD':
+        if msg.mode == 'OFFBOARD' and self.arm == True:
             self.is_ready_to_fly = True
         else:
             self.take_off()
@@ -51,6 +52,7 @@ class OffboardControl:
         try:
             armService = rospy.ServiceProxy('/mavros/cmd/arming', CommandBool)
             armService(True)
+            self.arm = True
         except rospy.ServiceException as e:
             print("Service arm call failed: %s" % e)
 
@@ -80,33 +82,45 @@ class OffboardControl:
         des_pose = PoseStamped()
         waypoint_index = 0
         sim_ctr = 1
-
+        print(self.mode)
         while self.mode == "HOVER" and not rospy.is_shutdown():
             if waypoint_index == shape:
                 waypoint_index = 0
                 sim_ctr += 1
+                self.hover_loc[2] = 3
+                self.hover_loc[5] = 0.8660254
+                self.hover_loc[6] = 0.5
+                location = self.hover_loc
+                loc = [location,
+                       location,
+                       location,
+                       location,
+                       location,
+                       location,
+                       location,
+                       location,
+                       location]
                 print("HOVER COUNTER: " + str(sim_ctr))
 
-            if self.is_ready_to_fly:
-                des_x = loc[waypoint_index][0]
-                des_y = loc[waypoint_index][1]
-                des_z = loc[waypoint_index][2]
-                des_pose.pose.position.x = des_x
-                des_pose.pose.position.y = des_y
-                des_pose.pose.position.z = des_z
-                des_pose.pose.orientation.x = loc[waypoint_index][3]
-                des_pose.pose.orientation.y = loc[waypoint_index][4]
-                des_pose.pose.orientation.z = loc[waypoint_index][5]
-                des_pose.pose.orientation.w = loc[waypoint_index][6]
+            des_x = loc[waypoint_index][0]
+            des_y = loc[waypoint_index][1]
+            des_z = loc[waypoint_index][2]
+            des_pose.pose.position.x = des_x
+            des_pose.pose.position.y = des_y
+            des_pose.pose.position.z = des_z
+            des_pose.pose.orientation.x = loc[waypoint_index][3]
+            des_pose.pose.orientation.y = loc[waypoint_index][4]
+            des_pose.pose.orientation.z = loc[waypoint_index][5]
+            des_pose.pose.orientation.w = loc[waypoint_index][6]
 
-                curr_x = self.curr_pose.pose.position.x
-                curr_y = self.curr_pose.pose.position.y
-                curr_z = self.curr_pose.pose.position.z
+            curr_x = self.curr_pose.pose.position.x
+            curr_y = self.curr_pose.pose.position.y
+            curr_z = self.curr_pose.pose.position.z
 
-                dist = math.sqrt((curr_x - des_x)*(curr_x - des_x) + (curr_y - des_y)*(curr_y - des_y) +
-                                 (curr_z - des_z)*(curr_z - des_z))
-                if dist < self.dist_threshold:
-                    waypoint_index += 1
+            dist = math.sqrt((curr_x - des_x)*(curr_x - des_x) + (curr_y - des_y)*(curr_y - des_y) +
+                             (curr_z - des_z)*(curr_z - des_z))
+            if dist < self.dist_threshold:
+                waypoint_index += 1
 
             pose_pub.publish(des_pose)
             rate.sleep()
@@ -135,6 +149,7 @@ class OffboardControl:
                 self.vel_history.publish("-0.5")
                 self.vel_pub.publish(self.velocity_controller(0, 1, -0.5))
             else:
+                print(self.mode)
                 self.vel_history.publish("0")
                 self.vel_pub.publish(self.velocity_controller(0, 1, 0))
 

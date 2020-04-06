@@ -11,6 +11,11 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_ros
   roscpp
   mavros_msgs
+  sensor_msgs
+  cv_bridge
+  roscpp
+  std_msgs
+  image_transport
 )
 
 ## System dependencies are found with CMake's conventions
@@ -105,7 +110,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES trn_imitation_learning
-  CATKIN_DEPENDS gazebo_ros roscpp mavros_msgs
+  CATKIN_DEPENDS gazebo_ros roscpp
 #  DEPENDS system_lib
 )
 
