@@ -48,7 +48,7 @@
       </material>
     </visual>
     <sensor type="ray" name="iris_range_down">
-      <update_rate>10</update_rate>
+      <update_rate>20</update_rate>
       <visualize>true</visualize>
       <ray>
         <scan>
@@ -74,7 +74,7 @@
         <robotNamespace>iris_odom</robotNamespace>
         <gaussianNoise>0.005</gaussianNoise>
         <alwaysOn>true</alwaysOn>
-        <updateRate>10</updateRate>
+        <updateRate>20</updateRate>
         <topicName>range_down</topicName>
         <frameName>range_down_link</frameName>
         <fov>0</fov>

@@ -15,9 +15,9 @@
     <arg name="vehicle" default="iris"/>
     <arg name="vehicle_sdf" default="iris_depth_camera"/>
 
-    <arg name="world" default="$(find trn_imitation_learning)/worlds/baylands.world"/> 
+    <arg name="world" default="$(find trn_imitation_learning)/worlds/baylands.world"/>
 <!--    
-    <arg name="world"  default="$(find mavlink_sitl_gazebo)/worlds/empty.world"/> 
+    <arg name="world"  default="$(find mavlink_sitl_gazebo)/worlds/terrain.world"/> 
 -->
     <arg name="sdf" default="$(find trn_imitation_learning)/models/$(arg vehicle_sdf)/$(arg vehicle_sdf).sdf"/>
 
@@ -57,6 +57,7 @@
         <arg name="fcu_url" value="$(arg fcu_url)"/>
         <arg name="respawn_mavros" value="$(arg respawn_mavros)"/>
     </include>
+
     <!-- Stereo camera 
 	<group ns="/stereo" >
     <node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc">

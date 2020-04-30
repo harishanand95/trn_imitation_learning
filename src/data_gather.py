@@ -3,8 +3,10 @@ from geometry_msgs.msg import PoseStamped
 from mavros_msgs.msg import State, PositionTarget
 import math
 from mavros_msgs.srv import SetMode, CommandBool
-from std_msgs.msg import String
+from std_msgs.msg import String, Header
 import time
+import sys
+from trn_imitation_learning.msg import velocity
 
 
 class OffboardControl:
@@ -13,7 +15,7 @@ class OffboardControl:
     def __init__(self):
         self.curr_pose = PoseStamped()
         self.is_ready_to_fly = False
-        self.hover_loc = [-192.959454, -50.688204, 50, 0, 0, 0, 0]
+        self.hover_loc = [0, 0, 5, 0, 0, 0, 0]#[-192.959454, -50.688204, 20, 0, 0, 0, 0]
         self.mode = "HOVER"
         self.dist_threshold = 0.4
         self.arm = False
@@ -24,7 +26,7 @@ class OffboardControl:
         self.state_sub = rospy.Subscriber('/mavros/state', State, callback=self.state_callback)
         self.vel_pub = rospy.Publisher('/mavros/setpoint_raw/local', PositionTarget, queue_size=10)
         self.decision = rospy.Subscriber('/data', String, callback=self.set_mode)
-        self.vel_history = rospy.Publisher('/OffboardControl/velocity_command', String, queue_size=10)
+        self.vel_history = rospy.Publisher('/OffboardControl/velocity_command', velocity, queue_size=10)
         self.controller()
 
     def set_mode(self, msg):
@@ -87,9 +89,11 @@ class OffboardControl:
             if waypoint_index == shape:
                 waypoint_index = 0
                 sim_ctr += 1
-                self.hover_loc[2] = 3
-                self.hover_loc[5] = 0.8660254
-                self.hover_loc[6] = 0.5
+                self.hover_loc[2] = 5
+                self.hover_loc[3] = 0
+                self.hover_loc[4] = 0
+                self.hover_loc[5] = -0.998
+                self.hover_loc[6] = 0.045
                 location = self.hover_loc
                 loc = [location,
                        location,
@@ -139,19 +143,37 @@ class OffboardControl:
 
     def forward(self):
         """ Forward controller """
+        rate = rospy.Rate(20)
         while self.mode[:7] == "FORWARD" and not rospy.is_shutdown():
             if self.mode == "FORWARD-UP":
-                print(self.mode)
-                self.vel_history.publish("0.5")
+                h = Header()
+                h.stamp = rospy.Time.now()
+                current_velocity = velocity()
+                current_velocity.header = h
+                current_velocity.velocity = "0.5"
+                self.vel_history.publish(current_velocity)
                 self.vel_pub.publish(self.velocity_controller(0, 1, 0.5))
+                rate.sleep()
             elif self.mode == "FORWARD-DOWN":
                 print(self.mode)
-                self.vel_history.publish("-0.5")
+                h = Header()
+                h.stamp = rospy.Time.now()
+                current_velocity = velocity()
+                current_velocity.header = h
+                current_velocity.velocity = "-0.5"
+                self.vel_history.publish(current_velocity)
                 self.vel_pub.publish(self.velocity_controller(0, 1, -0.5))
+                rate.sleep()
             else:
                 print(self.mode)
-                self.vel_history.publish("0")
+                h = Header()
+                h.stamp = rospy.Time.now()
+                current_velocity = velocity()
+                current_velocity.header = h
+                current_velocity.velocity = "0"
+                self.vel_history.publish(current_velocity)
                 self.vel_pub.publish(self.velocity_controller(0, 1, 0))
+                rate.sleep()
 
     def controller(self):
         """ A state machine developed to convert UAV movement to fixed states """

@@ -4,6 +4,8 @@ from std_msgs.msg import String
 
 rospy.init_node('tele_operation', anonymous=True)
 pub = rospy.Publisher('/data', String, queue_size=10)
+self.nn_pub = rospy.Publisher('/data', String, queue_size=10)
+
 
 def on_release(key):
     """ Press the following keys for desired effect :
@@ -25,6 +27,7 @@ def on_release(key):
     elif key == Key.esc:
         # Stop listener
         return False
+
 
 def on_press(key):
     pass

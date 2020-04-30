@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   image_transport
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -57,6 +58,10 @@ find_package(catkin REQUIRED COMPONENTS
 #   Message1.msg
 #   Message2.msg
 # )
+add_message_files(
+  FILES
+  velocity.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -73,10 +78,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+generate_messages(
+    DEPENDENCIES
+    std_msgs  # Or other packages containing msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -138,8 +143,16 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
+
+
 add_executable(data_gather src/data_gather.cpp)
 target_link_libraries(data_gather ${catkin_LIBRARIES})
+
+add_executable(read_bag src/read_bag.cpp)
+target_link_libraries(read_bag ${catkin_LIBRARIES})
+
+
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -203,7 +216,6 @@ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 #   # myfile2
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
-
 #############
 ## Testing ##
 #############
